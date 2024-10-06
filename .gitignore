@@ -5,8 +5,9 @@
 __pycache__
 db.sqlite3
 media
-# Ignore Django migrations
-*/migrations/*
+# Ignore Django migrations bytecode, but track migration files
+*/migrations/*.py[cod]
+!*/migrations/*.py
 !*/migrations/__init__.py
 
 # Backup files # 
