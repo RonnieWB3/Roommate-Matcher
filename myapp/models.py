@@ -3,9 +3,6 @@ from django.contrib.auth.models import AbstractUser
 
 class User(AbstractUser):
     profile_pic_url = models.URLField(max_length=200, blank=True, null=True)
-    first_name = models.CharField(max_length=50)
-    last_name = models.CharField(max_length=50)
-    email = models.EmailField(unique=True)
     bio = models.TextField(blank=True, null=True)
     notification_history = models.JSONField(blank=True, null=True)  # To store notifications as JSON data
 
