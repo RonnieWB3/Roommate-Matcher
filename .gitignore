@@ -140,3 +140,6 @@ GitHub.sublime-settings
 !.vscode/launch.json 
 !.vscode/extensions.json 
 .history
+
+#automatically created by macOS to store custom attributes of a folder
+.DS_Store
