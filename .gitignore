@@ -10,6 +10,10 @@ media
 !*/migrations/*.py
 !*/migrations/__init__.py
 
+# Logs
+logs/
+*.log
+
 # Backup files #
 *.bak
 
@@ -147,15 +151,15 @@ GitHub.sublime-settings
 
 # React ignore #
 # dependencies
-/node_modules
+node_modules/
 /.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage/
 
 # production
-/build
+build/
 
 # misc
 .env.local
@@ -172,3 +176,11 @@ node_modules/
 dist/
 coverage/
 .DS_Store
+
+# Ignore React build folder
+myapp/static/build/
+# Do not ignore collected static files
+# Ensure staticfiles/ is committed
+
+# Django static files
+static/
