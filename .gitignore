@@ -179,8 +179,7 @@ coverage/
 
 # Ignore React build folder
 myapp/static/build/
-# Do not ignore collected static files
-# Ensure staticfiles/ is committed
 
+staticfiles/
 # Django static files
 static/
