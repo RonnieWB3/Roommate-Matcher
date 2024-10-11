@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Button } from '../components/ui/button.tsx';
 import { Input } from '../components/ui/input.tsx';
 import { Select } from '../components/ui/select.tsx';
@@ -11,10 +12,43 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '../components/ui/popover.tsx';
-import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle } from "lucide-react"
+import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle } from "lucide-react";
 
 export default function LoggedInHomePageWithCreatePost() {
-  const [priceRange, setPriceRange] = useState([500, 2000])
+  const [priceRange, setPriceRange] = useState([500, 2000]);
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const csrfToken = getCookie('csrftoken'); // Fetch CSRF token from cookies
+      const response = await fetch("http://127.0.0.1:8000/api/logout/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": csrfToken,  // Include CSRF token in headers
+        },
+        credentials: 'include'  // Include cookies in the request to handle session
+      });
+      
+      if (response.ok) {
+        navigate("/");  // Redirect to the landing page after successful logout
+      } else {
+        console.error("Failed to log out");
+      }
+    } catch (error) {
+      console.error("An error occurred during logout", error);
+    }
+  };
+  
+  // Don't forget the getCookie function if it's not already defined:
+  function getCookie(name: string) {
+    const cookieValue = document.cookie
+      .split('; ')
+      .find(row => row.startsWith(name))
+      ?.split('=')[1];
+    return cookieValue || '';
+  }
+  
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -32,6 +66,9 @@ export default function LoggedInHomePageWithCreatePost() {
               <AvatarImage src="https://github.com/shadcn.png" alt="User" />
               <AvatarFallback>UN</AvatarFallback>
             </Avatar>
+            <Button variant="ghost" onClick={handleLogout}>
+              Log out
+            </Button> {/* Added the logout button */}
           </div>
         </div>
       </header>
@@ -142,5 +179,5 @@ export default function LoggedInHomePageWithCreatePost() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
