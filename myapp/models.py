@@ -3,28 +3,27 @@ from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
 class User(AbstractUser):
-    profile_pic_url = models.URLField(max_length=200, blank=True, null=True) # To store profile picture URL
-    bio = models.TextField(blank=True, null=True) # To store user bio
-    notification_history = models.JSONField(blank=True, null=True)  # To store notifications as JSON data
+    email = models.EmailField(unique=True)  # Make email unique
+    profile_pic_url = models.URLField(max_length=200, blank=True, null=True)
+    bio = models.TextField(blank=True, null=True)
+    notification_history = models.JSONField(blank=True, null=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']  # Required fields when creating a superuser
 
     def login(self):
-        # Define login logic here
         pass
 
     def register(self):
-        # Define registration logic here
         pass
 
     def update_profile(self):
-        # Define profile update logic here
         pass
 
     def reset_password(self):
-        # Define reset password logic here
         pass
 
     def email_verification(self):
-        # Define email verification logic here
         pass
 
 class PreferenceSheet(models.Model):

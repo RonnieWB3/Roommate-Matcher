@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'myapp',
     'corsheaders',  # Add this line
-    'rest_framework',  # If you’re planning to use Django REST Framework later
+    'rest_framework',  #Django REST Framework later
 ]
 
 MIDDLEWARE = [

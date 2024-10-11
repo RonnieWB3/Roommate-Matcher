@@ -10,10 +10,10 @@ export default function HomePage() {
         <div className="container mx-auto px-4 py-6 flex justify-between items-center">
           <h1 className="text-3xl font-bold text-primary">RoommateFinder</h1>
           <div className="flex space-x-2">
-            <Button asChild>
+            <Button aschild>
               <Link to="/login">Log In</Link>
             </Button>
-            <Button asChild>
+            <Button aschild>
               <Link to="/signup">Sign Up</Link>
             </Button>
           </div>

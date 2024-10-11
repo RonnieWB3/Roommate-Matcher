@@ -1,16 +1,16 @@
 import { useState } from "react"
-import { Button } from "@components/ui/button"
-import { Input } from "@components/ui/input"
-import { Select } from "@components/ui/select"
-import Slider from "@components/ui/slider"
-import { Avatar, AvatarFallback, AvatarImage } from "@components/ui/avatar"
-import { Card, CardContent, CardHeader, CardTitle } from "@components/ui/card"
-import { Badge } from "@components/ui/badge"
+import { Button } from '../components/ui/button.tsx';
+import { Input } from '../components/ui/input.tsx';
+import { Select } from '../components/ui/select.tsx';
+import Slider from '../components/ui/slider.tsx';
+import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar.tsx';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card.tsx';
+import { Badge } from '../components/ui/badge.tsx';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@components/ui/popover"
+} from '../components/ui/popover.tsx';
 import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle } from "lucide-react"
 
 export default function LoggedInHomePageWithCreatePost() {
