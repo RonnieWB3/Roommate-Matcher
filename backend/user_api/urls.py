@@ -11,8 +11,8 @@ urlpatterns = [
     
     
     # Profile Endpoints
-    path('profile/<int:id>/', views.ProfileView.as_view(), name='profile'),
-    path('profile/<int:id>/posts/', views.UserPostsView.as_view(), name='user-posts'),
+    path('profile/<int:user_id>/', views.ProfileView.as_view(), name='profile'),
+    path('profile/<int:user_id>/posts/', views.UserPostsView.as_view(), name='user-posts'),
     
     # Posts Endpoints
     path('posts/', views.PostListCreateView.as_view(), name='posts'),

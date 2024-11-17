@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/input";
 import { Select } from "./ui/select";
 import { Slider } from "./ui/slider";
-import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import { Avatar, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/Card";
 import { CardContent } from "./ui/CardContent";
 import { CardHeader } from "./ui/CardHeader";
@@ -15,13 +15,15 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "./ui/popover";
-import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle, LogOut } from "lucide-react";
+import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function LoggedInHomePage() {
   const [priceRange, setPriceRange] = useState([500, 2000]);
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const handleLogout = async () => {
     try {
@@ -37,6 +39,21 @@ function LoggedInHomePage() {
     }
   };
 
+  const toggleDropdown = () => setIsOpen(!isOpen);
+
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="min-h-screen bg-gray-100">
       {/* Header */}
@@ -50,13 +67,41 @@ function LoggedInHomePage() {
             <Button variant="ghost" size="icon">
               <MessageSquare className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={handleLogout}>
-              <LogOut className="h-5 w-5" />
-            </Button>
-            <Avatar>
-              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-              <AvatarFallback>UN</AvatarFallback>
-            </Avatar>
+            <div className="relative" ref={dropdownRef}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleDropdown}
+                aria-haspopup="true"
+                aria-expanded={isOpen}
+              >
+                <Avatar className="h-8 w-8 -space-x-5">
+                  <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                </Avatar>
+              </Button>
+              {isOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    <a
+                      onClick={() => navigate("/profile")}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                      role="menuitem"
+                    >
+                      <User className="mr-3 h-5 w-5 text-gray-400" />
+                      Profile
+                    </a>
+                    <a
+                      onClick={handleLogout}
+                      className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
+                      role="menuitem"
+                    >
+                      <LogOut className="mr-3 h-5 w-5 text-gray-400" />
+                      Log out
+                    </a>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
@@ -124,10 +169,10 @@ function LoggedInHomePage() {
             {[...Array(6)].map((_, index) => (
               <Card key={index}>
                 <CardHeader className="flex flex-row items-center gap-4">
-                  <Avatar className="h-12 w-12">
+                  <Avatar className="h-8 w-8 -space-x-5">
                     <AvatarImage src={`https://i.pravatar.cc/48?img=${index + 1}`} alt={`User ${index + 1}`} />
-                    <AvatarFallback>U{index + 1}</AvatarFallback>
                   </Avatar>
+
                   <div>
                     <CardTitle>John Doe</CardTitle>
                     <p className="text-sm text-muted-foreground">Age: 28</p>

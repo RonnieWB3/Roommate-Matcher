@@ -8,6 +8,7 @@ from .validations import custom_validation, validate_email, validate_password
 from .models import Post, Comment, Message, Match, AppUser
 from django.shortcuts import get_object_or_404
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 class UserRegister(APIView):
 	permission_classes = (permissions.AllowAny,)
@@ -144,13 +145,13 @@ class MatchListCreateView(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         user_two = serializer.validated_data.get('user_two')
         if user_two == self.request.user:
-            raise serializers.ValidationError("Cannot match with yourself.")
+            raise ValidationError("Cannot match with yourself.")
         # Check if match already exists
         if Match.objects.filter(
             Q(user_one=self.request.user, user_two=user_two) | 
             Q(user_one=user_two, user_two=self.request.user)
         ).exists():
-            raise serializers.ValidationError("Match already exists.")
+            raise ValidationError("Match already exists.")
         # Calculate compatibility score (implement your own logic)
         compatibility_score = calculate_compatibility(self.request.user, user_two)
         serializer.save(user_one=self.request.user, compatibility_score=compatibility_score)
@@ -196,7 +197,7 @@ class ProfileView(generics.RetrieveAPIView):
     queryset = AppUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
-    lookup_field = 'id'
+    lookup_field = 'user_id'
 # user_api/views.py
 from .models import Post
 from .serializers import PostSerializer
@@ -209,7 +210,7 @@ class UserPostsView(generics.ListAPIView):
     permission_classes = [permissions.IsAuthenticated]
     
     def get_queryset(self):
-        user_id = self.kwargs.get('id')
+        user_id = self.kwargs.get('user_id')
         return Post.objects.filter(user__id=user_id).order_by('-created_at')
 class ProfileEditView(generics.RetrieveUpdateAPIView):
     """
