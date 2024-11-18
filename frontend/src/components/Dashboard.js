@@ -1,29 +1,67 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Button } from "./ui/Button";
-import { Input } from "./ui/input";
-import { Select } from "./ui/select";
-import { Slider } from "./ui/slider";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/Card";
 import { CardContent } from "./ui/CardContent";
 import { CardHeader } from "./ui/CardHeader";
 import { CardTitle } from "./ui/CardTitle";
-
-import { Badge } from "./ui/badge";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "./ui/popover";
-import { Search, MapPin, DollarSign, Users, Bell, MessageSquare, SlidersHorizontal, PlusCircle, LogOut, User } from "lucide-react";
+import { PlusCircle, Bell, MessageSquare, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function LoggedInHomePage() {
-  const [priceRange, setPriceRange] = useState([500, 2000]);
-  const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
+  const [posts, setPosts] = useState([]); // To store posts data
+  const [profilePicture, setProfilePicture] = useState(null); // Profile picture URL
+  const [isOpen, setIsOpen] = useState(false); // Dropdown menu state
+  const [showCreatePost, setShowCreatePost] = useState(false); // Modal visibility
+  const [newPost, setNewPost] = useState({ title: "", content: "", cost: "", location: "" }); // New post data
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
+
+  // Fetch posts and user profile picture
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Step 1: Fetch user data
+        const userResponse = await axios.get("http://127.0.0.1:8000/api/user/", {
+          withCredentials: true,
+        });
+        const userId = userResponse.data.user.user_id;
+
+        // Step 2: Fetch profile picture
+        const profileResponse = await axios.get(
+          `http://127.0.0.1:8000/api/profile/${userId}/`,
+          { withCredentials: true }
+        );
+        setProfilePicture(profileResponse.data.profile_picture);
+
+        // Step 3: Fetch posts
+        const postsResponse = await axios.get("http://127.0.0.1:8000/api/posts/", {
+          withCredentials: true,
+        });
+        setPosts(postsResponse.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // Dropdown menu handling
+  const toggleDropdown = () => setIsOpen(!isOpen);
+  const handleClickOutside = (event) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -39,20 +77,28 @@ function LoggedInHomePage() {
     }
   };
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
-
-  const handleClickOutside = (event) => {
-    if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-      setIsOpen(false);
-    }
+  // Handle form input changes
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewPost({ ...newPost, [name]: value });
   };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  // Handle post submission
+  const handleCreatePost = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await axios.post(
+        "http://127.0.0.1:8000/api/posts/",
+        newPost,
+        { withCredentials: true }
+      );
+      setPosts([response.data, ...posts]); // Add new post to the top of the list
+      setShowCreatePost(false); // Close the modal
+      setNewPost({ title: "", content: "", cost: "", location: "" }); // Reset form
+    } catch (error) {
+      console.error("Error creating post:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -75,13 +121,21 @@ function LoggedInHomePage() {
                 aria-haspopup="true"
                 aria-expanded={isOpen}
               >
-                <Avatar className="h-8 w-8 -space-x-5">
-                  <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+                <Avatar className="h-8 w-8">
+                  <AvatarImage
+                    src={profilePicture || "https://via.placeholder.com/48"}
+                    alt="User Profile"
+                  />
                 </Avatar>
               </Button>
               {isOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                  <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+                  <div
+                    className="py-1"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="options-menu"
+                  >
                     <a
                       onClick={() => navigate("/profile")}
                       className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 cursor-pointer"
@@ -108,113 +162,96 @@ function LoggedInHomePage() {
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {/* Hero Section */}
         <section className="mb-12">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold">Find Your Perfect Roommate</h2>
-            <Button>
+            <Button onClick={() => setShowCreatePost(true)}>
               <PlusCircle className="mr-2 h-4 w-4" /> Create Post
             </Button>
           </div>
-          <div className="flex gap-4">
-            <div className="flex-grow">
-              <Input placeholder="Search by location" className="w-full" />
-            </div>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline">
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-80">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Price Range</h4>
-                    <Slider
-                      min={0}
-                      max={5000}
-                      step={100}
-                      value={priceRange}
-                      onValueChange={setPriceRange}
-                    />
-                    <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>${priceRange[0]}</span>
-                      <span>${priceRange[1]}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">Number of Rooms</h4>
-                    <Select>
-                      <option value="">Any</option>
-                      <option value="1">1 Room</option>
-                      <option value="2">2 Rooms</option>
-                      <option value="3">3 Rooms</option>
-                      <option value="4+">4+ Rooms</option>
-                    </Select>
-                  </div>
-                </div>
-              </PopoverContent>
-            </Popover>
-            <Button>
-              <Search className="mr-2 h-4 w-4" /> Search
-            </Button>
-          </div>
         </section>
 
-        {/* Potential Roommates Section */}
-        <section>
-          <h2 className="text-2xl font-semibold mb-6">Potential Roommates</h2>
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[...Array(6)].map((_, index) => (
-              <Card key={index}>
-                <CardHeader className="flex flex-row items-center gap-4">
-                  <Avatar className="h-8 w-8 -space-x-5">
-                    <AvatarImage src={`https://i.pravatar.cc/48?img=${index + 1}`} alt={`User ${index + 1}`} />
-                  </Avatar>
-
-                  <div>
-                    <CardTitle>John Doe</CardTitle>
-                    <p className="text-sm text-muted-foreground">Age: 28</p>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <MapPin className="h-4 w-4" />
-                    <span>San Francisco, CA</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                    <DollarSign className="h-4 w-4" />
-                    <span>Budget: $1000 - $1500</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
-                    <Users className="h-4 w-4" />
-                    <span>2 Rooms Available</span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    <Badge variant="secondary">Non-smoker</Badge>
-                    <Badge variant="secondary">Pet-friendly</Badge>
-                    <Badge variant="secondary">Early bird</Badge>
-                  </div>
-                  <p className="text-sm mb-4">
-                    Looking for a clean and quiet roommate. I work in tech and enjoy hiking on weekends.
-                  </p>
-                  <Button className="w-full">
-                    <Users className="mr-2 h-4 w-4" /> Connect
+        {/* Modal for Create Post */}
+        {showCreatePost && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white p-6 rounded shadow-lg w-96">
+              <h2 className="text-xl font-bold mb-4">Create Post</h2>
+              <form onSubmit={handleCreatePost}>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Title</label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={newPost.title}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Content</label>
+                  <textarea
+                    name="content"
+                    value={newPost.content}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Cost</label>
+                  <input
+                    type="number"
+                    name="cost"
+                    value={newPost.cost}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">Location</label>
+                  <input
+                    type="text"
+                    name="location"
+                    value={newPost.location}
+                    onChange={handleInputChange}
+                    className="w-full border rounded p-2"
+                    required
+                  />
+                </div>
+                <div className="flex justify-end space-x-2">
+                  <Button type="button" onClick={() => setShowCreatePost(false)}>
+                    Cancel
                   </Button>
-                </CardContent>
-              </Card>
-            ))}
+                  <Button type="submit">Create</Button>
+                </div>
+              </form>
+            </div>
           </div>
+        )}
+
+        {/* Posts */}
+        <section>
+          <h2 className="text-2xl font-semibold mb-6">Existing Posts</h2>
+          {posts.length > 0 ? (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {posts.map((post, index) => (
+                <Card key={index}>
+                  <CardHeader>
+                    <CardTitle>{post.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p>{post.content || "No description available."}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <p>No posts available.</p>
+          )}
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="bg-gray-200 py-6">
-        <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; {new Date().getFullYear()} RoommateFinder. All rights reserved.</p>
-        </div>
-      </footer>
     </div>
   );
 }
