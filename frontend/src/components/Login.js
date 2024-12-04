@@ -1,27 +1,27 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'; //React: Core library for building the UI useState: Hook for managing state in functional components
+import axios from 'axios'; //Library for making HTTP requests
+import { useNavigate } from 'react-router-dom'; //React Router: Library for routing in React applications
 
 function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate(); // Hook to programmatically navigate
+  const [email, setEmail] = useState(''); //Stores the email entered by the user
+  const [password, setPassword] = useState(''); //Stores the password entered by the user
+  const [error, setError] = useState(''); //Stores the error message to be displayed to the user
+  const navigate = useNavigate(); //Provides a function to navigate to different routes after a successful login
 
-  const handleLogin = async () => {
+  const handleLogin = async () => { //Handles login attempts by sending the email and password to the backend API
     try {
       const response = await axios.post(
         'http://127.0.0.1:8000/api/login/',
         {
-          email, // From state or input
-          password, // From state or input
+          email,
+          password,
         },
-        { withCredentials: true } // Required for session authentication
+        { withCredentials: true }
       );
 
       console.log(response.data);
 
-      // Redirect to dashboard if login is successful
+      
       navigate('/dashboard');
     } catch (error) {
       setError('Invalid email or password. Please try again.');

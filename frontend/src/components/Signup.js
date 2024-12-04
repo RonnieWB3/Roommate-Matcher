@@ -9,12 +9,12 @@ function SignupPage() {
   });
   const [error, setError] = useState('');
 
-  const handleSignup = async () => {
+  const handleSignup = async () => { // Submits the form data to the backend for user registration
     try {
       const response = await axios.post('http://127.0.0.1:8000/api/register/', formData);
 
       if (response.status === 201) {
-        window.location.href = '/login'; // Redirect to login
+        window.location.href = '/login';
       }
     } catch (err) {
       setError('Signup failed. Please try again.');

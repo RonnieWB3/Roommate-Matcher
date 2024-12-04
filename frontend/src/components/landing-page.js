@@ -1,10 +1,10 @@
 // src/components/LandingPage.js
 
-import React from 'react';
-import { Link } from "react-router-dom";
+import React from 'react'; //The core library for building user interfaces
+import { Link } from "react-router-dom"; //A React Router component to navigate between pages without reloading
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
-import { Search, Users, Home, Shield } from "lucide-react";
+import { Search, Users, Home, Shield } from "lucide-react"; //Lucide is a set of clean and consistent icons for React
 
 function LandingPage() {
   return (

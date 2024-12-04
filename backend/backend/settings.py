@@ -10,14 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-from pathlib import Path
-from decouple import config
-import os
+from pathlib import Path # This is a Python module that provides an object-oriented interface for working with the file system.
+from decouple import config # This is a Python module that helps you to separate the settings of your Django project from your source code.
+import os # This module provides a portable way of using operating system dependent functionality.
 
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent # This is the base directory of the Django project.
 
 
 # Quick-start development settings - unsuitable for production
@@ -27,19 +27,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-7v(!o&*h4o8jo#h@8du+i%^=!*_59cs419bvh^2y%)$9cvp1td'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # This is a boolean that turns on/off the debug mode of the Django project.
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['*'] # This is a list of strings representing the host/domain names that this Django site can serve.
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+MEDIA_URL = '/media/' # This is the URL that handles the media files uploaded by the user.
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # This is the directory where the media files are stored.
 
-CORS_ALLOWED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = [ # This is a list of strings representing the origin URLs that are allowed to make requests to this Django project.
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
-CORS_ALLOW_CREDENTIALS = True
+CSRF_TRUSTED_ORIGINS = [ # This is a list of strings representing the origin URLs that are allowed to make CSRF requests to this Django project.
+    "http://127.0.0.1:3000",  
+]
+CORS_ALLOW_CREDENTIALS = True # This is a boolean that allows the credentials to be included in the requests to this Django project.
 
 # Application definition
 
@@ -50,13 +52,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'corsheaders',
-    'rest_framework',
-    'user_api.apps.UserApiConfig',
+    'corsheaders', # This is the Django application that allows the Django project to handle the CORS requests.
+    'rest_framework', # This is the Django application that provides the REST API framework for the Django project.
+    'user_api.apps.UserApiConfig', # This is the Django application that provides the user model for the Django project.
 ]
 
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # This is the middleware that allows the Django project to handle the CORS requests.
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,7 +68,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'backend.urls'
+ROOT_URLCONF = 'backend.urls' # This is the URL configuration of the Django project.
 
 TEMPLATES = [
     {
@@ -102,9 +104,9 @@ DATABASES = {
 }
 
 ## User model
-AUTH_USER_MODEL = 'user_api.AppUser'
+AUTH_USER_MODEL = 'user_api.AppUser' # This is the user model of the Django project.
 
-REST_FRAMEWORK = {
+REST_FRAMEWORK = { # This is the configuration of the REST framework of the Django project.
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
@@ -147,8 +149,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = '/static/'
+STATIC_URL = 'static/' # This is the URL that handles the static files of the Django project.
+STATIC_ROOT = '/static/' # This is the directory where the static files are stored.
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

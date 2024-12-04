@@ -1,38 +1,43 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react"; // Import the useState and useEffect hooks
 import { Button } from "./ui/Button";
 import { Avatar, AvatarImage } from "./ui/avatar";
 import { Card } from "./ui/Card";
 import { CardContent } from "./ui/CardContent";
 import { CardHeader } from "./ui/CardHeader";
 import { CardTitle } from "./ui/CardTitle";
-import { Badge } from "./ui/badge";
-import { PlusCircle, Bell, MessageSquare, LogOut, User, Mail, MapPin, DollarSign, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { PlusCircle, Bell, MessageSquare, LogOut, User, Mail, Trash } from "lucide-react"; // Import the icons
+import { useNavigate } from "react-router-dom"; // Hook for navigating between routes in the app
+import axios from "axios"; // Library for making HTTP requests
 
 function LoggedInHomePage() {
-  const [posts, setPosts] = useState([]);
-  const [profilePicture, setProfilePicture] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [showCreatePost, setShowCreatePost] = useState(false);
-  const [newPost, setNewPost] = useState({ title: "", content: "", cost: "", location: "" });
-  const dropdownRef = useRef(null);
-  const navigate = useNavigate();
+  const [posts, setPosts] = useState([]); // List of existing posts
+  const [profilePicture, setProfilePicture] = useState(null); // URL of the user's profile picture
+  const [currentUser, setCurrentUser] = useState(null); //Logged-in user's details
+  const [isOpen, setIsOpen] = useState(false); //Tracks whether a dropdown menu is open
+  const [showCreatePost, setShowCreatePost] = useState(false); //Controls the visibility of the Create Post modal
+  const [newPost, setNewPost] = useState({ title: "", content: "", cost: "", location: "" }); //Object storing form data for creating a new post
+  const dropdownRef = useRef(null); //Reference to the dropdown menu for detecting outside clicks
+  const navigate = useNavigate(); //Function to programmatically redirect users to a different route
 
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch current user
         const userResponse = await axios.get("http://127.0.0.1:8000/api/user/", {
           withCredentials: true,
         });
+        setCurrentUser(userResponse.data.user);
+
         const userId = userResponse.data.user.user_id;
 
+        // Fetch profile picture
         const profileResponse = await axios.get(
           `http://127.0.0.1:8000/api/profile/${userId}/`,
           { withCredentials: true }
         );
         setProfilePicture(profileResponse.data.profile_picture);
 
+        // Fetch posts
         const postsResponse = await axios.get("http://127.0.0.1:8000/api/posts/", {
           withCredentials: true,
         });
@@ -43,23 +48,23 @@ function LoggedInHomePage() {
     };
 
     fetchData();
-  }, []);
+  }, []); //This useEffect runs only once due to the empty dependency array []
 
-  const toggleDropdown = () => setIsOpen(!isOpen);
-  const handleClickOutside = (event) => {
+  const toggleDropdown = () => setIsOpen(!isOpen); //Function to toggle the dropdown menu
+  const handleClickOutside = (event) => { //Function to close the dropdown menu when clicking outside
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
       setIsOpen(false);
     }
   };
 
-  useEffect(() => {
+  useEffect(() => { //Add an event listener to detect clicks outside the dropdown menu
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
-  const handleLogout = async () => {
+  const handleLogout = async () => { //Logs out the user by calling the backend and redirects them to the landing page
     try {
       await axios.post(
         "http://127.0.0.1:8000/api/logout/",
@@ -73,24 +78,75 @@ function LoggedInHomePage() {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e) => { //Updates the newPost state object when the user types in the form fields
     const { name, value } = e.target;
     setNewPost({ ...newPost, [name]: value });
   };
 
-  const handleCreatePost = async (e) => {
+  const validatePost = (post) => { //Validates the post data before creating a new post
+    if (!post.title || !post.content || !post.cost || !post.location) {
+      return "All fields are required.";
+    }
+    if (isNaN(post.cost) || Number(post.cost) <= 0) {
+      return "Cost must be a positive number.";
+    }
+    return null;
+  };
+
+  const getCsrfToken = () => { //Function to extract the CSRF token from the browser's cookies
+    const csrfTokenMatch = document.cookie.match(/csrftoken=([^;]+)/);
+    return csrfTokenMatch ? csrfTokenMatch[1] : null;
+  };
+
+  const handleCreatePost = async (e) => { //Function to create a new post by sending a POST request to the backend
     e.preventDefault();
+
+    // Validate the post data
+    const error = validatePost(newPost);
+    if (error) {
+      console.error(error);
+      return;
+    }
+
     try {
+      const csrfToken = getCsrfToken();
+
       const response = await axios.post(
         "http://127.0.0.1:8000/api/posts/",
         newPost,
-        { withCredentials: true }
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrfToken,
+          },
+        }
       );
       setPosts([response.data, ...posts]);
       setShowCreatePost(false);
       setNewPost({ title: "", content: "", cost: "", location: "" });
+    } catch (err) {
+      console.error("Error creating post:", err.response?.data || err.message);
+    }
+  };
+
+  const handleDeletePost = async (postId) => { //Function to delete a post by sending a DELETE request to the backend
+    if (!window.confirm("Are you sure you want to delete this post?")) return;
+
+    try {
+      const csrfToken = getCsrfToken();
+
+      await axios.delete(`http://127.0.0.1:8000/api/posts/${postId}/`, {
+        withCredentials: true,
+        headers: {
+          "X-CSRFToken": csrfToken,
+        },
+      });
+
+      // Update the posts state by removing the deleted post
+      setPosts(posts.filter((post) => post.post_id !== postId));
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error deleting post:", error.response?.data || error.message);
     }
   };
 
@@ -253,12 +309,23 @@ function LoggedInHomePage() {
                       <p className="text-sm text-gray-600">
                         Location: {post.location} | Cost: ${post.cost}
                       </p>
-                      <Button
-                        variant="outline"
-                        className="border-indigo-500 text-indigo-500 hover:bg-transparent hover:text-indigo-800"
-                      >
-                        <Mail className="mr-2 h-4 w-4" /> Message
-                      </Button>
+                      <div className="flex space-x-2">
+                        <Button
+                          variant="outline"
+                          className="border-indigo-500 text-indigo-500 hover:bg-transparent hover:text-indigo-800"
+                        >
+                          <Mail className="mr-2 h-4 w-4" /> Message
+                        </Button>
+                        {post.user.user_id === currentUser?.user_id && (
+                          <Button
+                            variant="outline"
+                            className="border-red-500 text-red-500 hover:bg-red-500 hover:text-white"
+                            onClick={() => handleDeletePost(post.post_id)}
+                          >
+                            <Trash className="mr-2 h-4 w-4" /> Delete
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

@@ -3,7 +3,7 @@ from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser, PermissionsMixin
 
 class AppUserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email, password=None): #creates a user with the given email and password
         if not email:
             raise ValueError('The Email field must be set')
         if not password:
@@ -13,7 +13,7 @@ class AppUserManager(BaseUserManager):
         user.set_password(password)
         user.save()
         return user
-    def create_superuser(self, email, password=None):
+    def create_superuser(self, email, password=None): #creates a superuser with the given email and password
         if not email:
             raise ValueError('The Email field must be set')
         if not password:
@@ -22,7 +22,7 @@ class AppUserManager(BaseUserManager):
         user.is_superuser = True
         user.save()
         return user
-class AppUser(AbstractUser, PermissionsMixin):
+class AppUser(AbstractUser, PermissionsMixin): #Custom user model extending AbstractUser
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField(max_length=50,unique=True)
     username = models.CharField(max_length=50)
@@ -33,12 +33,11 @@ class AppUser(AbstractUser, PermissionsMixin):
     location = models.CharField(max_length=100, blank=True, null=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
-    objects = AppUserManager()
+    objects = AppUserManager() #assigning the custom user manager to the objects attribute
     def __str__(self):
         return self.username
     
-# user_api/models.py
-class Post(models.Model):
+class Post(models.Model): #Represents posts created by users
     post_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='posts')
     title = models.CharField(max_length=100)
@@ -50,8 +49,8 @@ class Post(models.Model):
     def __str__(self):
         return f"{self.title} by {self.user.username}"
 
-# user_api/models.py
-class Comment(models.Model):
+
+class Comment(models.Model): #Represents comments made by users on posts
     comment_id = models.AutoField(primary_key=True)
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='comments')
     user = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='comments')
@@ -60,8 +59,8 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.post.title}"
-# user_api/models.py
-class Message(models.Model):
+
+class Message(models.Model): #Represents messages sent between users
     message_id = models.AutoField(primary_key=True)
     sender = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='received_messages')
@@ -74,8 +73,8 @@ class Message(models.Model):
 
     def __str__(self):
         return f"From {self.sender.username} to {self.receiver.username} at {self.timestamp}"
-# user_api/models.py
-class Match(models.Model):
+
+class Match(models.Model): #Represents a match between two users
     match_id = models.AutoField(primary_key=True)
     user_one = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='matches_initiated')
     user_two = models.ForeignKey(AppUser, on_delete=models.CASCADE, related_name='matches_received')

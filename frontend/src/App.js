@@ -1,7 +1,5 @@
-// src/App.js
-
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React from 'react'; //Core library for building the application
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'; //Routing library for React
 import LandingPage from './components/landing-page';
 import Login from './components/Login'; // Create these components
 import Signup from './components/Signup'; // Create these components

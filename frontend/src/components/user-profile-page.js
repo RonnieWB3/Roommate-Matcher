@@ -11,16 +11,16 @@ import { MapPin, Calendar, Edit, User, LogOut, Mail } from "lucide-react";
 import axios from "axios";
 
 function UserProfilePage() {
-  const navigate = useNavigate();
-  const [user, setUser] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const navigate = useNavigate(); // Navigation hook
+  const [user, setUser] = useState(null); // Stores the user's profile information.
+  const [posts, setPosts] = useState([]); //Stores the user's posts
+  const [isLoading, setIsLoading] = useState(true); // Tracks if the data is still being loaded
+  const [isOpen, setIsOpen] = useState(false); // Tracks whether the dropdown menu is open
+  const dropdownRef = useRef(null); // Used to detect clicks outside the dropdown menu to close it
 
-  // Fetch user and posts
+
   useEffect(() => {
-    const fetchUserData = async () => {
+    const fetchUserData = async () => { //Fetches the user's profile and posts data from the backend
       try {
         const currentUserResponse = await axios.get("http://127.0.0.1:8000/api/user/", {
           withCredentials: true,
@@ -48,7 +48,7 @@ function UserProfilePage() {
     fetchUserData();
   }, []);
 
-  // Dropdown menu handling
+  // Toggles the dropdown menu visibility
   const toggleDropdown = () => setIsOpen(!isOpen);
   const handleClickOutside = (event) => {
     if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -63,7 +63,7 @@ function UserProfilePage() {
     };
   }, []);
 
-  // Logout
+  // Logs the user out by making a POST request to the backend
   const handleLogout = async () => {
     try {
       await axios.post("http://127.0.0.1:8000/api/logout/", {}, { withCredentials: true });
@@ -73,11 +73,11 @@ function UserProfilePage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading) { //Displays a loading message until data fetching is complete
     return <div>Loading...</div>;
   }
 
-  if (!user) {
+  if (!user) { //Displays an error message if user data cannot be loaded
     return <div>Error: User data could not be loaded.</div>;
   }
 
